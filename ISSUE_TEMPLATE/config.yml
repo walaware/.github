@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Documentation standard
+    url: https://github.com/walaware/.github/blob/main/DOCUMENTATION.md
+    about: How walaware repos document themselves.
+  - name: AI policy
+    url: https://github.com/walaware/.github/blob/main/AI_POLICY.md
+    about: How AI is used across the suite.
