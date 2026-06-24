@@ -76,10 +76,8 @@ there, is only useful once every app picks it up.
   200 — easy to misread as an app bug. Keep each app on its own PB port (below).
 - **Per-app dev ports** — allocate by app index `n` (tripwala 0, shopwala 1, …):
   vite `5173 + n*100`, PocketBase `8090 + n*100`. Each app sets `server.port` + the
-  proxy target in its `vite.config.js` accordingly, and registers
-  `http://localhost:<viteport>/auth/callback` in its own Google OAuth client
-  (alongside the prod URI). **Use `localhost` everywhere, never `127.0.0.1`** —
-  Google treats them as different origins (the classic `redirect_uri_mismatch`).
+  proxy target in its `vite.config.js` accordingly (and registers the matching
+  OAuth redirect URI — see below).
 
   | App | dev vite (web) | dev PocketBase |
   | --- | --- | --- |
@@ -91,14 +89,31 @@ there, is only useful once every app picks it up.
   their playground off the app grid (Storybook's `6006`, or vite on `5900`).
 
 - **Host port registry** — the published **Caddy** entrypoint for full-stack
-  (`docker compose up`) / prod-parity runs. Each app also registers
-  `http://localhost:<host>/auth/callback` for this single-origin shape:
+  (`docker compose up`) / prod-parity runs (each app publishes Caddy here; OAuth
+  redirect URI below):
 
   | App | Host (Caddy) |
   | --- | --- |
   | tripwala | `8080` |
   | shopwala | `8081` |
   | _next app_ | `8082` … (increment) |
+
+- **Google OAuth redirect URIs.** Sign-in sends `${origin}/auth/callback`, and
+  Google does an **exact-match** on scheme + host + **port** + path — so register
+  one redirect URI per origin you sign in from, under the OAuth client's
+  **Authorized redirect URIs** (not "Authorized JavaScript origins"; this is a
+  server-side code exchange). Each app needs all three surfaces — e.g. tripwala:
+
+  | Surface | Redirect URI |
+  | --- | --- |
+  | native dev (vite) | `http://localhost:5173/auth/callback` |
+  | docker stack (Caddy) | `http://localhost:8080/auth/callback` |
+  | production | `https://<app-domain>/auth/callback` |
+
+  Swap in each app's own ports from the tables above; the path is always
+  `/auth/callback`. **Always `localhost`, never `127.0.0.1`** — Google treats them
+  as different origins (the classic `redirect_uri_mismatch`). Changes take a minute
+  or two to propagate.
 
 ## Secrets & deploy
 
