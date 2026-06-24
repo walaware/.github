@@ -2,6 +2,21 @@
 
 The rules every repo follows. Paired with [architecture.md](architecture.md).
 
+## Staying in sync
+
+Two repos are the shared source of truth for the whole suite — **each app should
+check them periodically (e.g. start of a work session, or before a release) and
+realign**:
+
+- **[`walaware/design`](https://github.com/walaware/design)** — the design
+  system. Bump the `@walaware/design` dependency to the latest tag and reconcile
+  any component/token changes; don't fork house style locally.
+- **`walaware/.github`** (this repo) — conventions + architecture. Adopt new
+  conventions as they land (ports, secrets, data, etc.) so the apps don't drift.
+
+Drift is the thing to avoid: a convention added here, or a design update shipped
+there, is only useful once every app picks it up.
+
 ## PocketBase / data
 
 - **Migrations are the source of truth.** Numbered `pocketbase/pb_migrations/*.js`,
@@ -45,20 +60,39 @@ The rules every repo follows. Paired with [architecture.md](architecture.md).
 - Per-task model config, cheap-first. Vision degrades gracefully when no vision
   model is set. Log per-call usage + cost; honor an optional monthly budget cap.
 
-## Local development (docker-only)
+## Local development
 
-- **Run every app's full stack via `docker compose up` — never native `vite dev`
-  / `pocketbase serve`.** Both are the source of all collisions: every app's
-  stack defaults to the same internal ports (vite 5173, PocketBase 8090). The
-  symptom of two PocketBase on `:8090` is the records API returning
-  `404 "Missing collection context"` while `/api/health` and the schema endpoints
-  still 200 — easy to misread as an app bug.
-- **Per-project docker networks namespace the internal ports** (`pocketbase:8090`,
-  `web:3000`), so they exist independently in each stack and never collide. The
-  ONLY coordinated resource is the **host-published Caddy entrypoint**.
-- **Host port registry** (the one thing to coordinate). Each app publishes Caddy
-  as `<host>:80` and registers its own `http://localhost:<host>/auth/callback` in
-  its own Google OAuth client — so OAuth works for all with zero CORS config:
+- **Default loop: run `web` natively for HMR; PocketBase in docker.** `vite dev`
+  serves the SvelteKit app with hot-module reload and **proxies `/api` + `/_` to
+  PocketBase** (already wired in each app's `vite.config.js`), so the browser and
+  SSR stay same-origin — this is the proxy model in
+  [architecture.md](architecture.md). Run PocketBase via docker with its `8090`
+  **published to the host** so vite can reach it (or run the binary natively).
+  Full `docker compose up` is the **production-parity check** — run it before a
+  PR/deploy — not the iteration loop.
+- **Exactly one PocketBase per app.** Two PocketBase on the same `:8090` is the one
+  collision that silently corrupts dev: the records API returns
+  `404 "Missing collection context"` while `/api/health` and schema endpoints still
+  200 — easy to misread as an app bug. Keep each app on its own PB port (below).
+- **Per-app dev ports** — allocate by app index `n` (tripwala 0, shopwala 1, …):
+  vite `5173 + n*100`, PocketBase `8090 + n*100`. Each app sets `server.port` + the
+  proxy target in its `vite.config.js` accordingly, and registers
+  `http://localhost:<viteport>/auth/callback` in its own Google OAuth client
+  (alongside the prod URI). **Use `localhost` everywhere, never `127.0.0.1`** —
+  Google treats them as different origins (the classic `redirect_uri_mismatch`).
+
+  | App | dev vite (web) | dev PocketBase |
+  | --- | --- | --- |
+  | tripwala | 5173 | 8090 |
+  | shopwala | 5273 | 8190 |
+  | _next app_ | 5373 | 8290 … (increment) |
+
+  Shared **libraries** (e.g. `@walaware/design`) have no PocketBase/OAuth — run
+  their playground off the app grid (Storybook's `6006`, or vite on `5900`).
+
+- **Host port registry** — the published **Caddy** entrypoint for full-stack
+  (`docker compose up`) / prod-parity runs. Each app also registers
+  `http://localhost:<host>/auth/callback` for this single-origin shape:
 
   | App | Host (Caddy) |
   | --- | --- |
@@ -66,19 +100,18 @@ The rules every repo follows. Paired with [architecture.md](architecture.md).
   | shopwala | `8081` |
   | _next app_ | `8082` … (increment) |
 
-- **Native fallback ranges** — only if an app genuinely needs native HMR. Reserved
-  non-overlapping per app so they never collide; allocate by app index `n`
-  (tripwala 0, shopwala 1, …): vite `5173 + n*100`, PocketBase `8090 + n*100`.
-
-  | App | native vite | native PocketBase |
-  | --- | --- | --- |
-  | tripwala | 5173 | 8090 |
-  | shopwala | 5273 | 8190 |
-
 ## Secrets & deploy
 
-- **No secrets in code.** `.env.example` documents every var; real values come
-  from 1Password `op://` and `op run -- docker compose …` in prod.
+- **No secrets in code.** `.env.example` is a committed *template* of 1Password
+  references, not values. All of an app's secrets live under **one item per
+  environment** in a shared vault (e.g. `homelab` vault, item `<app>-dev`), one
+  field per secret — easy to audit and rotate in a single place.
+- **Resolve once, then run docker normally.** `scripts/env-from-op.sh` runs
+  `op inject -i .env.example -o .env`; `docker compose up` reads `.env` like any
+  other — no `op run` wrapper per command. Re-run after a rotation. `.env` is
+  gitignored and `chmod 600`. Keep literal `<vault>/<item>/<field>` references
+  out of comments — `op inject` resolves any it finds, so an example ref in a
+  comment fails the whole inject.
 - One Compose stack per app; `docker-compose.prod.yml` pulls GHCR images named
   `<app>-<service>`. Back up the `pb_data` volume.
 - CI (`.github/workflows/docker.yml`) builds + pushes images on `main` / tags.
