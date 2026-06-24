@@ -112,8 +112,11 @@ there, is only useful once every app picks it up.
   gitignored and `chmod 600`. Keep literal `<vault>/<item>/<field>` references
   out of comments — `op inject` resolves any it finds, so an example ref in a
   comment fails the whole inject.
-- One Compose stack per app; `docker-compose.prod.yml` pulls GHCR images named
-  `<app>-<service>`. Back up the `pb_data` volume.
+- **Compose files use Compose v2 names** (no `docker-` prefix), one stack per app:
+  `compose.yml` (the full stack — dev prod-parity, builds locally),
+  `compose.dev.yml` (dev override that publishes PocketBase to the host for the
+  native-`vite` loop), `compose.prod.yml` (pulls GHCR images named
+  `<app>-<service>`). Back up the `pb_data` volume.
 - CI (`.github/workflows/docker.yml`) builds + pushes images on `main` / tags.
 
 ## Naming
