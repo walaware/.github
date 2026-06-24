@@ -86,7 +86,8 @@ there, is only useful once every app picks it up.
   | _next app_ | 5373 | 8290 … (increment) |
 
   Shared **libraries** (e.g. `@walaware/design`) have no PocketBase/OAuth — run
-  their playground off the app grid (Storybook's `6006`, or vite on `5900`).
+  their playground off the app grid (Storybook's `6006`, or vite on `5901` — **not
+  `5900`, which is macOS Screen Sharing/VNC**).
 
 - **Host port registry** — the published **Caddy** entrypoint for full-stack
   (`docker compose up`) / prod-parity runs (each app publishes Caddy here; OAuth
