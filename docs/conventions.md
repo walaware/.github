@@ -45,6 +45,36 @@ The rules every repo follows. Paired with [architecture.md](architecture.md).
 - Per-task model config, cheap-first. Vision degrades gracefully when no vision
   model is set. Log per-call usage + cost; honor an optional monthly budget cap.
 
+## Local development (docker-only)
+
+- **Run every app's full stack via `docker compose up` — never native `vite dev`
+  / `pocketbase serve`.** Both are the source of all collisions: every app's
+  stack defaults to the same internal ports (vite 5173, PocketBase 8090). The
+  symptom of two PocketBase on `:8090` is the records API returning
+  `404 "Missing collection context"` while `/api/health` and the schema endpoints
+  still 200 — easy to misread as an app bug.
+- **Per-project docker networks namespace the internal ports** (`pocketbase:8090`,
+  `web:3000`), so they exist independently in each stack and never collide. The
+  ONLY coordinated resource is the **host-published Caddy entrypoint**.
+- **Host port registry** (the one thing to coordinate). Each app publishes Caddy
+  as `<host>:80` and registers its own `http://localhost:<host>/auth/callback` in
+  its own Google OAuth client — so OAuth works for all with zero CORS config:
+
+  | App | Host (Caddy) |
+  | --- | --- |
+  | tripwala | `8080` |
+  | shopwala | `8081` |
+  | _next app_ | `8082` … (increment) |
+
+- **Native fallback ranges** — only if an app genuinely needs native HMR. Reserved
+  non-overlapping per app so they never collide; allocate by app index `n`
+  (tripwala 0, shopwala 1, …): vite `5173 + n*100`, PocketBase `8090 + n*100`.
+
+  | App | native vite | native PocketBase |
+  | --- | --- | --- |
+  | tripwala | 5173 | 8090 |
+  | shopwala | 5273 | 8190 |
+
 ## Secrets & deploy
 
 - **No secrets in code.** `.env.example` documents every var; real values come
