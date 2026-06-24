@@ -54,8 +54,8 @@ See [CONTRIBUTING](https://github.com/walaware/.github/blob/main/CONTRIBUTING.md
 ## Deploying (homelab / GHCR)
 
 ```bash
-op run -- docker compose -f docker-compose.prod.yml pull
-op run -- docker compose -f docker-compose.prod.yml up -d
+op run -- docker compose -f compose.prod.yml pull
+op run -- docker compose -f compose.prod.yml up -d
 ```
 
 Front the published Caddy port with a reverse proxy / Cloudflare Tunnel. Back up

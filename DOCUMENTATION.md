@@ -38,7 +38,7 @@ follow this; existing repos converge on it.
 4. **Quick start (Docker)** — `git clone` → `cp .env.example .env` → `docker compose up --build` → the demo URL.
 5. **Tech stack** — 2-column table (Layer | Choice) with links.
 6. **Local development** — Node 22+ / pnpm / PocketBase binary; `pnpm check` + `pnpm build` before a PR.
-7. **Deploying (homelab / GHCR)** — `op run -- docker compose -f docker-compose.prod.yml …`; reverse-proxy / Cloudflare Tunnel note; "back up `pb_data`".
+7. **Deploying (homelab / GHCR)** — `op run -- docker compose -f compose.prod.yml …`; reverse-proxy / Cloudflare Tunnel note; "back up `pb_data`".
 8. **How it works** — data model (collections) + a **Security model** subsection.
 9. **Roadmap** — short teaser + link to `ROADMAP.md`.
 10. **Built with AI** — two lines + link to `AI_POLICY.md`.

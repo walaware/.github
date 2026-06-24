@@ -18,8 +18,8 @@ Every walaware app is the same shape. Learn it once; it applies to all of them.
 
 ```
 <app>/
-├── docker-compose.yml          # pocketbase + web (+ worker) + caddy
-├── docker-compose.prod.yml     # pulls GHCR images, no local build
+├── compose.yml          # pocketbase + web (+ worker) + caddy
+├── compose.prod.yml     # pulls GHCR images, no local build
 ├── Caddyfile                   # single entry point (same-origin)
 ├── .env.example                # all config; op:// URIs in prod
 ├── pocketbase/
