@@ -35,6 +35,27 @@ of restating shared rules.
   mature sibling ([tripwala](https://github.com/walaware/tripwala)) for structure,
   pick the LICENSE per policy, and let community-health files inherit from this repo.
 
+## Need a new visual surface? Route it through design
+
+Whenever an app needs a **new visual surface** — a component, a page, or any
+visual design — the design system leads; **don't start fresh in the app**. In
+order:
+
+1. **Check first.** Look for existing guidance and primitives in
+   **`@walaware/design`** and the [design repo](https://github.com/walaware/design)
+   before making anything new. If it's already covered, use it.
+2. **Prefer shared over local.** If new code is genuinely needed, decide whether
+   it should be a **shareable component** rather than app-local — especially
+   anything that isn't app-specific. Generic → shared; domain → local.
+3. **Request it from design.** When it should be shared, request a new package from
+   the **design agent** (the [design repo](https://github.com/walaware/design) owns
+   shared surfaces) rather than re-rolling it in the app.
+4. **Design agent owns the design.** It consults **Claude Design** for the design
+   guidance, syncs the result to the **design repo**, then releases a **design
+   package plus the app-specific guidance** from there.
+5. **Then build.** Only once that's released does the app agent continue with the
+   frontend work — against the shipped package and guidance, not a local guess.
+
 ## House style
 
 Match surrounding code. Many small files over few large ones. Immutable updates.
