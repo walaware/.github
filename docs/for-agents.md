@@ -62,7 +62,7 @@ surface locally — leave it and flag it as a request to forward to the design a
 ### Reaching the design agent over clideck
 
 The request in step 3 goes to the design agent over **clideck**. Reuse a session
-before spawning one, and clean up after:
+before spawning one:
 
 1. **Look for an existing design session first.** `clideck agents --all` lists the
    *active* cross-project sessions with their `@project/session` ask addresses (the
@@ -78,9 +78,9 @@ before spawning one, and clean up after:
    minutes; set both `--timeout` and your own shell timeout high. A timeout means
    "still working," not "failed" — poll `clideck agents` for `working:false`, then
    re-ask for the outcome instead of re-injecting mid-task.
-5. **Clean up when done.** If you *created* the session for this request, remove it
-   once the work lands; if you *resumed* a pre-existing one, return it to dormant.
-   Don't leave orphaned sessions running.
+
+Leave session teardown to the human — closing/deleting a clideck session isn't an
+agent action.
 
 ## House style
 
