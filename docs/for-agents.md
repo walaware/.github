@@ -56,6 +56,32 @@ order:
 5. **Then build.** Only once that's released does the app agent continue with the
    frontend work — against the shipped package and guidance, not a local guess.
 
+If clideck isn't available (any non-dev-server session), don't build the shared
+surface locally — leave it and flag it as a request to forward to the design agent.
+
+### Reaching the design agent over clideck
+
+The request in step 3 goes to the design agent over **clideck**. Reuse a session
+before spawning one, and clean up after:
+
+1. **Look for an existing design session first.** `clideck agents --all` lists the
+   *active* cross-project sessions with their `@project/session` ask addresses (the
+   design one is under `@design/…`). Dormant sessions are **not** in that list — check
+   the clideck app for a **stale/resumable** design session.
+2. **Resume the stale one** rather than spawning a duplicate; then confirm it now
+   shows under `clideck agents --all`. A just-resumed session may first replay stale
+   context from its previous task — re-ask cleanly and ignore that first capture.
+3. **Otherwise create a new session** in the `design` project through clideck.
+4. **Ask it:** `clideck ask --session "@design/<name>" --timeout 8m --message "…"`.
+   `--timeout` takes a **duration string** (`8m`, `30s`, `1h`) — a bare number parses
+   as `0s` and the call returns instantly. The target is another agent that may need
+   minutes; set both `--timeout` and your own shell timeout high. A timeout means
+   "still working," not "failed" — poll `clideck agents` for `working:false`, then
+   re-ask for the outcome instead of re-injecting mid-task.
+5. **Clean up when done.** If you *created* the session for this request, remove it
+   once the work lands; if you *resumed* a pre-existing one, return it to dormant.
+   Don't leave orphaned sessions running.
+
 ## House style
 
 Match surrounding code. Many small files over few large ones. Immutable updates.
