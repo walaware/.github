@@ -56,30 +56,34 @@ order:
 5. **Then build.** Only once that's released does the app agent continue with the
    frontend work — against the shipped package and guidance, not a local guess.
 
-If clideck isn't available (any non-dev-server session), don't build the shared
+If Paseo isn't available (any non-dev-server session), don't build the shared
 surface locally — leave it and flag it as a request to forward to the design agent.
 
-### Reaching the design agent over clideck
+### Reaching the design agent over Paseo
 
-The request in step 3 goes to the design agent over **clideck**. Reuse a session
+The request in step 3 goes to the design agent over **Paseo**. Reuse an agent
 before spawning one:
 
-1. **Look for an existing design session first.** `clideck agents --all` lists the
-   *active* cross-project sessions with their `@project/session` ask addresses (the
-   design one is under `@design/…`). Dormant sessions are **not** in that list — check
-   the clideck app for a **stale/resumable** design session.
-2. **Resume the stale one** rather than spawning a duplicate; then confirm it now
-   shows under `clideck agents --all`. A just-resumed session may first replay stale
-   context from its previous task — re-ask cleanly and ignore that first capture.
-3. **Otherwise create a new session** in the `design` project through clideck.
-4. **Ask it:** `clideck ask --session "@design/<name>" --timeout 8m --message "…"`.
-   `--timeout` takes a **duration string** (`8m`, `30s`, `1h`) — a bare number parses
-   as `0s` and the call returns instantly. The target is another agent that may need
-   minutes; set both `--timeout` and your own shell timeout high. A timeout means
-   "still working," not "failed" — poll `clideck agents` for `working:false`, then
-   re-ask for the outcome instead of re-injecting mid-task.
+1. **Look for an existing design agent first.** `paseo ls -g` lists agents across all
+   projects with their id, name, cwd, and status; the design one runs in the
+   `walaware/design` cwd. Add `-a` (`paseo ls -g -a`) to include archived agents when
+   hunting for a **stale/resumable** design agent.
+2. **Reuse the existing one** rather than spawning a duplicate. A just-resumed agent
+   may first replay stale context from its previous task — re-ask cleanly and ignore
+   that first capture.
+3. **Otherwise create one:** `paseo run "…" --provider claude --cwd <design-repo>`
+   (or `paseo import <claude-session-id> --provider claude --cwd <design-repo>` to
+   adopt an existing Claude session).
+4. **Ask it:** `paseo send <design-agent-id> --prompt "…"`. `send` **blocks until the
+   agent goes idle and returns its reply** (add `--no-wait` to fire-and-forget). The
+   target is another agent that may need minutes — set your own shell/tool timeout
+   high. If your call is interrupted it means "still working," not "failed": wait with
+   `paseo wait <id>` or poll `paseo ls -g` for the agent's `STATUS` back to `idle`,
+   then read the outcome with `paseo logs <id>` instead of re-injecting mid-task. For
+   ongoing multi-agent coordination, a shared `paseo chat` room (`paseo chat post
+   <room> "…"` / `paseo chat wait <room>`) is the more decoupled alternative.
 
-Leave session teardown to the human — closing/deleting a clideck session isn't an
+Leave agent teardown to the human — archiving/deleting a Paseo agent isn't an
 agent action.
 
 ## House style
