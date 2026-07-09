@@ -29,6 +29,22 @@ of restating shared rules.
 
 ## Reuse over reinvention
 
+- **Before building a new app at all, check whether great open-source already
+  exists.** walaware manages the corners of life; it does not need to own every
+  piece of software that does. Where a mature, healthy, self-hostable project
+  already covers a corner, the walaware move is to **recommend it and use it** —
+  see [adopted-tools.md](adopted-tools.md). Judge health on evidence (commit cadence,
+  contributor count, bus factor, release discipline), not stars. Suite design
+  coherence is a real benefit, but it is never worth shipping a worse app. Money &
+  expenses resolved this way: we use [Sure](https://github.com/we-promise/sure)
+  instead of building `moneywala`, and there is **no `moneywala` repo**.
+- **When an adopted tool falls short, log it before acting on it.** Gaps go in the
+  wishlist in [adopted-tools.md](adopted-tools.md). Gaps found by reading source
+  usually aren't felt in daily use — write them down, live with them, and let the
+  ones that are real prove it. **Don't propose patches, forks, or rewrites off a
+  code read.** If an item does earn action, the order is contribute upstream, then
+  fork, then rewrite: a fork is free to start later and expensive to maintain early,
+  and "the architecture underneath is more elegant" is not a user-visible feature.
 - Tokens & generic components → **`@walaware/design`**; don't re-roll buttons,
   cards, the wordmark, the palette. Check its `dist/` for exact component props.
 - New app? Copy the skeletons in [../templates/](../templates/), mirror the most
