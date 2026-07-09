@@ -40,12 +40,51 @@ underneath is more elegant" is not a user-visible feature.
 
 ---
 
-## 👛 Money & expenses → [`we-promise/sure`](https://github.com/we-promise/sure)
+## 👛 Money & expenses → [Sure](https://sure.am)
 
-AGPL-3.0 · Rails 8.1 + Postgres + Redis + Sidekiq · self-hosted via docker-compose.
-Community fork of the archived `maybe-finance/maybe`, unaffiliated with Maybe Finance Inc.
+**Site** [sure.am](https://sure.am) · **Docs** [docs.sure.am](https://docs.sure.am) ·
+**Source** [`we-promise/sure`](https://github.com/we-promise/sure)
+
+AGPL-3.0 · Rails 8.1 + Postgres + Redis + Sidekiq · self-hosted via docker-compose
+(or [Helm](https://docs.sure.am/self-hosting-helm)). Community fork of the archived
+`maybe-finance/maybe`, unaffiliated with Maybe Finance Inc.
 
 **Decided 2026-07-09. `moneywala` will not be built.**
+
+### Docs worth bookmarking
+
+[`docs.sure.am/llms.txt`](https://docs.sure.am/llms.txt) is a machine-readable index
+of every page — **start any agent there.**
+
+| Page | For |
+| --- | --- |
+| [Self-hosting (Docker)](https://docs.sure.am/self-hosting) | The deploy. Compose file, env vars, backup profile, upgrade path. |
+| [Quickstart](https://docs.sure.am/quickstart) | First run. |
+| [Providers overview](https://docs.sure.am/providers/overview) | Choosing banking / crypto / market-data providers. |
+| [SimpleFIN](https://docs.sure.am/providers/simplefin) | Our bank-sync choice — user brings their own token. |
+| [Market data](https://docs.sure.am/providers/market-data) | `yahoo_finance` works with no API key. |
+| [CSV imports](https://docs.sure.am/guides/app-features/csv-imports) | Migrating off Actual Budget. |
+| [Family sharing](https://docs.sure.am/guides/app-features/family-sharing) | Adding a partner. |
+| [Investment accounts](https://docs.sure.am/guides/key-concepts/investment-accounts) | Holdings, trades, cost basis. |
+| [API reference](https://docs.sure.am/openapi.yaml) | OpenAPI spec. |
+
+### Deployment gotchas
+
+- **`ghcr.io/we-promise/sure:latest` is the ALPHA channel.** Use **`:stable`** for
+  anything real. This is an unusual convention and easy to pattern-match straight
+  past — pin the resolved digest.
+- **Required env is just `SECRET_KEY_BASE` + `POSTGRES_PASSWORD`.** Sure encrypts
+  some columns (e.g. `invitations.email`/`token`) and the docs list no separate
+  ActiveRecord encryption keys, so those are almost certainly derived from
+  `SECRET_KEY_BASE`. **Treat it as the master key** — store it before first boot;
+  losing it once data exists may make encrypted columns unrecoverable.
+- Use the **official backup service** shipped in the compose file
+  (`prodrigestivill/postgres-backup-local`, behind `--profile backup`, writing to
+  `/opt/sure-data/backups`) rather than hand-rolling a `pg_dump` cron. Test the
+  restore. This is financial data.
+- The **first user of an instance auto-becomes `super_admin`.**
+- On self-hosted, invitations **send no email** unless SMTP is configured — the UI
+  surfaces a copy-paste accept link instead. Expected, not a bug.
 
 ### Why not build
 
@@ -114,8 +153,10 @@ Tracked against HEAD `8d649bc` / `v0.7.2`.
 
 ### Next step
 
-Self-host Sure. Import Actual data. **Use it as a daily budget for a month**, then log
-what actually bit. The decision after that is empirical, not architectural.
+Self-host Sure ([Docker guide](https://docs.sure.am/self-hosting)). Import Actual data
+([CSV imports](https://docs.sure.am/guides/app-features/csv-imports)). **Use it as a
+daily budget for a month**, then log what actually bit. The decision after that is
+empirical, not architectural.
 
 Revisit `moneywala` only if the double-entry gap becomes concrete after real use —
 options, corporate actions, multi-currency lots. Then you'd know exactly what you're

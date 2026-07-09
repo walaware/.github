@@ -20,7 +20,7 @@ conventions so the whole suite feels like a single product.
 | 🛍️ **[shopwala](https://github.com/walaware/shopwala)** | Buying & selling — a Marketplace agent + hub | in build |
 | ❤️ **healthwala** | Health & meals | planned |
 | 📦 **stuffwala** | Personal inventory | planned |
-| 👛 ~~moneywala~~ | Money & expenses | **not building — we use [Sure](https://github.com/we-promise/sure)** |
+| 👛 ~~moneywala~~ | Money & expenses | **not building — we use [Sure](https://sure.am)** |
 | ✅ **taskwala** | Plans & tasks | planned |
 | 👥 **folkwala** | People & relationships | planned |
 
@@ -33,16 +33,15 @@ repo, the home for org-wide conventions ([documentation standard](DOCUMENTATION.
 
 The point of walaware is to *manage* the corners of life, not to own every piece of
 software that does it. Where great open-source already exists, the walaware move is
-to **recommend it, use it, and contribute back** — not to reinvent it in Svelte so
-the accent colour matches. Suite coherence is worth something; it isn't worth a
-worse app.
+to **recommend it and use it** — not to reinvent it in Svelte so the accent colour
+matches. Suite coherence is worth something; it isn't worth a worse app.
 
 So a corner of life can resolve one of two ways: we build it, or we point at the
 people already doing amazing work.
 
 | Corner | We use | Why not build |
 | --- | --- | --- |
-| 👛 Money & expenses | **[we-promise/sure](https://github.com/we-promise/sure)** (AGPL, self-hosted) | Envelope-grade budgeting, investments, net worth, ~18 bank/broker/crypto integrations, BYO-key market data, and free unlimited household members on self-hosted — with finer per-account permissions than the $100/yr commercial alternatives. Taking ~200 commits a month from 160+ contributors. |
+| 👛 Money & expenses | **[Sure](https://sure.am)** — [docs](https://docs.sure.am) · [source](https://github.com/we-promise/sure) (AGPL, self-hosted) | Budgeting, investments, net worth, ~18 bank/broker/crypto integrations, BYO-key market data, and free unlimited household members on self-hosted — with finer per-account permissions than the $100/yr commercial alternatives. Taking ~200 commits a month from 160+ contributors. |
 
 When a tool we adopt falls short, we **write it down before we act on it.** Every
 adopted tool carries a wishlist in [adopted-tools.md](docs/adopted-tools.md). Gaps get
