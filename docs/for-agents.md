@@ -36,8 +36,9 @@ of restating shared rules.
   see [adopted-tools.md](adopted-tools.md). Judge health on evidence (commit cadence,
   contributor count, bus factor, release discipline), not stars. Suite design
   coherence is a real benefit, but it is never worth shipping a worse app. Money &
-  expenses resolved this way: we use [Sure](https://github.com/we-promise/sure)
-  instead of building `moneywala`, and there is **no `moneywala` repo**.
+  expenses resolved this way: we use [Sure](https://sure.am)
+  ([docs](https://docs.sure.am)) instead of building `moneywala`, and there is
+  **no `moneywala` repo**.
 - **When an adopted tool falls short, log it before acting on it.** Gaps go in the
   wishlist in [adopted-tools.md](adopted-tools.md). Gaps found by reading source
   usually aren't felt in daily use — write them down, live with them, and let the
