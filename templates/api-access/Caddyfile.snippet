@@ -1,0 +1,42 @@
+# walaware API Access — tailnet-only curated API surface.
+#
+# The PUBLIC edge is unchanged (Authentik for shopwala; the tripwala Caddy that
+# exposes only /api/files/*). This is a SEPARATE site that listens on the
+# tailscale interface and proxies ONLY the curated /api/x/* routes — never the
+# raw records API, never the /_/ admin UI.
+#
+# Two ways to bind to the tailnet only; pick one:
+#
+# (a) Bind Caddy to the host's tailscale IP (MagicDNS name resolves to it).
+#     Requires the tailscale interface be up before Caddy starts.
+#
+#     https://{$APP}.{$TAILNET}.ts.net {
+#         bind {$TS_IP}                      # tailscale IP only — not 0.0.0.0
+#         tls internal                       # or tailscale cert via `tailscale cert`
+#
+#         # Curated surface only. Everything else 404s.
+#         handle /api/x/* {
+#             reverse_proxy pocketbase:8090
+#         }
+#         handle {
+#             respond 404
+#         }
+#     }
+#
+# (b) Simpler for a homelab: run `tailscale serve` (or a sidecar) in front of a
+#     plain-HTTP Caddy site that is itself only reachable on the docker network,
+#     and let tailscale terminate TLS + restrict to the tailnet. The Caddy site
+#     still restricts the PATH:
+#
+#     :8091 {
+#         handle /api/x/* {
+#             reverse_proxy pocketbase:8090
+#         }
+#         handle {
+#             respond 404
+#         }
+#     }
+#     # then:  tailscale serve --bg --https 443 http://127.0.0.1:8091
+#
+# Consumers then reach:  https://<app>.<tailnet>.ts.net/api/x/v1/...
+# which is exactly <APP>_API_URL.

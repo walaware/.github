@@ -29,6 +29,20 @@ there, is only useful once every app picks it up.
   rules to superuser-only. All access flows through the app server.
 - **Seed a demo row** so the UI renders end-to-end during scaffold (idempotent).
 
+## API access (when an app exposes one)
+
+- **Programmatic access uses scoped tokens, never superuser.** An `api_clients`
+  auth collection holds one record per consumer with a `scopes` allowlist; the app
+  server mints long-lived tokens via PocketBase's `impersonate` endpoint. Consumers
+  get exactly `<APP>_API_URL` + `<APP>_API_TOKEN`.
+- **Curated surface over raw collections.** Expose a versioned `/api/x/v1/*` via a
+  PB JS hook returning stable payloads — don't open raw collection rules. Reads and
+  writes are separate scope allowlists.
+- **Tailnet-only.** The API is a separate Caddy site on the trusted tailnet
+  proxying only `/api/x/*`; the public edge and the superuser-only collection rules
+  are unchanged. Full standard + reference kit:
+  [api-access.md](api-access.md) · [`../templates/api-access/`](../templates/api-access/).
+
 ## Web (SvelteKit 5)
 
 - Svelte 5 **runes** (`$props`, `$state`, `$derived`); JSDoc types in `.js`,

@@ -24,6 +24,10 @@ of restating shared rules.
   model never autonomously sends on a real account without the policy gate +
   human approval.
 - **AI output is always Zod-validated** and degrades to a deterministic fallback.
+- **Programmatic API access is scoped, never superuser.** Need to give a consumer
+  backend access? Follow the [API Access standard](api-access.md) — an
+  `api_clients` scoped token + curated `/api/x/*` route + tailnet-only path. Never
+  hand out a superuser token, and don't loosen collection rules to do it.
 - **Verify before claiming done:** `pnpm check` + `pnpm build` (web); typecheck
   the worker. Report failures honestly.
 

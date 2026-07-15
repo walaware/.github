@@ -19,6 +19,7 @@ follow this; existing repos converge on it.
 | `README.md` | ✅ apps & libs | The front door — fixed structure (§2). |
 | `ROADMAP.md` | apps | Living, human-owned; links issues/milestones/discussions. |
 | `docs/*.md` | as needed | Design docs / specs (§3). |
+| `docs/for-api.md` | apps with an API | The consumer-facing API doc, per the [API Access standard](docs/api-access.md). Template in [`templates/api-access/`](templates/api-access/). |
 | `LICENSE` | ✅ | Per the license policy (§5). |
 | `CONTRIBUTING.md` | inherited | Add a local copy only to override the org default. |
 | `CODE_OF_CONDUCT.md` | inherited | Org default; don't duplicate. |
