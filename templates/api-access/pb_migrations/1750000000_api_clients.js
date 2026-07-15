@@ -28,9 +28,12 @@ migrate((app) => {
     // 63072000s = 730 days.
     authToken: { duration: 63072000 },
 
-    // Deactivating a client is an INSTANT, cryptographically-independent revoke:
-    // PB re-applies authRule every time a token is verified, so `active = false`
-    // rejects every outstanding token for that client immediately.
+    // authRule gates any auth *flow* to active clients. NOTE: PocketBase 0.39.4
+    // does NOT re-run authRule on every request for an already-issued impersonate
+    // token (requireAuth only verifies the signature) — so `active = false` alone
+    // does NOT reject an outstanding token. Instant revoke is enforced IN-ROUTE by
+    // lib.requireActive() in api_x.pb.js (every curated route passes through it).
+    // Cryptographic invalidation of a token is `api-token.sh rotate` (tokenKey).
     authRule: "active = true",
     manageRule: null,
 

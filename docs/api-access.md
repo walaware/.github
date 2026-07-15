@@ -76,13 +76,16 @@ scopes**, **network exposure**. Plus **documentation** and **security posture**.
   `<APP>_API_URL` and `<APP>_API_TOKEN` (uppercased app name). Stored as
   1Password `op://` refs like every other secret — never committed.
 - **Rotation & revocation** (both in `api-token.sh`):
-  - **Revoke — instant.** Set `active = false`. The collection's
-    `authRule = "active = true"` is re-checked on *every* token verification, so
-    all outstanding tokens for that client are rejected immediately — no waiting
-    for expiry.
-  - **Rotate.** Reset the record's password → PocketBase regenerates its
-    `tokenKey` → every previously-issued token is cryptographically invalidated →
-    mint a fresh one. Rotate on a schedule and on any suspected exposure.
+  - **Revoke — instant, enforced in-route.** Set `active = false`. PocketBase
+    0.39.4 does **not** re-run the collection `authRule` on every request for an
+    already-issued impersonate token (`requireAuth` only verifies the signature),
+    so `active = false` alone does not reject an outstanding token. The curated
+    routes therefore check `active` themselves — `lib.requireActive(e)` runs on
+    every `/api/x/*` call — making revoke effective immediately, independent of PB
+    token timing. (Discovered adopting this in tripwala against live PB 0.39.4.)
+  - **Rotate — cryptographic.** Reset the record's password → PocketBase
+    regenerates its `tokenKey` → every previously-issued token is invalidated
+    (401) → mint a fresh one. Rotate on a schedule and on any suspected exposure.
 
 ## 2. Authorization / scopes
 
@@ -110,6 +113,22 @@ collections) never breaks a consumer.
   explicit, field-limited rule referencing the `api_clients` identity — still never
   superuser — and documents it as such. Curated-first keeps the consumer contract
   stable.
+
+### PocketBase 0.39.4 JSVM gotchas (baked into the kit)
+
+Three non-obvious JSVM behaviors — found adopting this in tripwala against a live
+PB 0.39.4 — that the reference kit already handles. Don't re-litigate them:
+
+- **Handlers are isolated.** A `routerAdd` handler cannot reference file-scope
+  helpers/consts (throws `ReferenceError` at request time). Shared helpers + the
+  `API_SURFACE` manifest live in `api_x_lib.js` and each handler pulls them via
+  `require(`${__hooks}/api_x_lib.js`)`.
+- **`json` fields read back as raw bytes.** `record.get('scopes')` returns the
+  bytes of the JSON text, not a decoded array — a naïve `indexOf` scope check
+  fails closed (403s a *granted* scope). `lib.jsonArray()` decodes bytes → string
+  → parse.
+- **`active = false` doesn't revoke an issued token** (see §1). Enforced in-route
+  by `lib.requireActive()`.
 
 ## 3. Network exposure
 
@@ -198,8 +217,8 @@ Track adoption across the app repos here (update as apps ship it):
 
 | App | Migration | Curated routes | Tailnet Caddy | `docs/for-api.md` | Status |
 | --- | --- | --- | --- | --- | --- |
-| tripwala | ☐ | ☐ | ☐ | ☐ | not started |
-| shopwala | ☐ | ☐ | ☐ | ☐ | not started |
+| tripwala | ☑ | ☑ | ☑ | ☑ | branch `feat/api-access`, verified vs live PB 0.39.4; pending token mint + `tailscale serve` + merge |
+| shopwala | ☐ | ☐ | ☐ | ☐ | in progress |
 | _next app_ | ☐ | ☐ | ☐ | ☐ | — |
 
 ## Security / boundaries

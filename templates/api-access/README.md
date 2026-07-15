@@ -11,7 +11,8 @@ edge or superuser boundary changes.
 | File | Copies to | Role |
 | --- | --- | --- |
 | `pb_migrations/1750000000_api_clients.js` | `pocketbase/pb_migrations/` (renumber) | The `api_clients` scoped-token identity collection. |
-| `pb_hooks/api_x.pb.js` | `pocketbase/pb_hooks/` | The curated, versioned `/api/x/v1/*` surface + scope guard + audit log. |
+| `pb_hooks/api_x.pb.js` | `pocketbase/pb_hooks/` | The curated, versioned `/api/x/v1/*` routes. |
+| `pb_hooks/api_x_lib.js` | `pocketbase/pb_hooks/` | Shared helpers + `API_SURFACE` manifest, `require()`'d by the routes (JSVM handlers can't use file-scope helpers). |
 | `scripts/api-token.sh` | `scripts/` | Mint / rotate / revoke tokens via the impersonate endpoint. |
 | `Caddyfile.snippet` | fold into the app's tailnet Caddy site | Expose **only** `/api/x/*`, tailnet-only. |
 | `docs/for-api.template.md` | `docs/for-api.md` | The consumer-facing API doc. |
@@ -22,10 +23,11 @@ edge or superuser boundary changes.
       **renumber** its prefix so it runs *before* the final `lock_rules`
       migration. Edit the seed's example scopes. `docker compose up` and confirm
       the `api_clients` collection appears.
-- [ ] **2. Surface.** Copy `pb_hooks/api_x.pb.js`. Fill in `API_SURFACE` and
-      replace the example routes with the app's real curated read/write routes.
-      Reads and writes are **separate** scope allowlists. Return explicit payloads
-      — never a raw record.
+- [ ] **2. Surface.** Copy `pb_hooks/api_x.pb.js` **and** `pb_hooks/api_x_lib.js`.
+      Fill in `API_SURFACE` (in the lib) and replace the example routes with the
+      app's real curated read/write routes. Reads and writes are **separate** scope
+      allowlists. Return explicit payloads — never a raw record. Keep helpers in the
+      `require()`'d lib — JSVM handlers can't reference file-scope helpers.
 - [ ] **3. Scopes.** Define the app's scope vocabulary (`<domain>:read` /
       `<domain>:write`) in `API_SURFACE` and in `docs/for-api.md`. Keep them
       identical.
@@ -50,7 +52,10 @@ edge or superuser boundary changes.
 
 - These are **PocketBase 0.39.4** patterns: an `auth` collection minted via the
   `impersonate` endpoint for long-lived tokens, `$apis.requireAuth` + a scope check
-  in JS hooks, `authRule = "active = true"` for instant revocation.
+  in JS hooks. Instant revoke is enforced **in-route** (`requireActive`), not by
+  `authRule` — PB doesn't re-run authRule per request for issued tokens; `rotate`
+  (tokenKey) is the cryptographic invalidation. See the JSVM gotchas in
+  [`../../docs/api-access.md`](../../docs/api-access.md).
 - Nothing here weakens the existing invariant: collection rules stay superuser-only
   and the browser still never talks to PocketBase directly. This adds a *second*,
   narrow, tailnet-only door — it doesn't widen the front one.
