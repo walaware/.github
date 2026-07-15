@@ -40,3 +40,13 @@
 #
 # Consumers then reach:  https://<app>.<tailnet>.ts.net/api/x/v1/...
 # which is exactly <APP>_API_URL.
+#
+# ALSO belt-and-suspenders: make the PUBLIC site explicitly refuse the surface,
+# so it can never leak through the public edge (Authentik / the files-only Caddy)
+# even by misconfiguration. In the public site block:
+#
+#     handle /api/x/* {
+#         respond 404
+#     }
+#
+# (Both tripwala and shopwala do this.)

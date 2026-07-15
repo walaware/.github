@@ -82,7 +82,9 @@ scopes**, **network exposure**. Plus **documentation** and **security posture**.
     so `active = false` alone does not reject an outstanding token. The curated
     routes therefore check `active` themselves — `lib.requireActive(e)` runs on
     every `/api/x/*` call — making revoke effective immediately, independent of PB
-    token timing. (Discovered adopting this in tripwala against live PB 0.39.4.)
+    token timing. `api-token.sh revoke` belt-and-suspenders it: `active = false`
+    **and** a tokenKey reset, so the JWT is also cryptographically dead. (Both
+    tripwala and shopwala independently confirmed this against live PB 0.39.4.)
   - **Rotate — cryptographic.** Reset the record's password → PocketBase
     regenerates its `tokenKey` → every previously-issued token is invalidated
     (401) → mint a fresh one. Rotate on a schedule and on any suspected exposure.
@@ -162,18 +164,25 @@ and how to obtain/rotate a token. It's linked from the app README's "How it work
 - **Revocable & rotatable** instantly (§1).
 - **Audit/logging.** Every curated call logs one structured line — client, scope,
   method, path — plus a `warn` on any scope denial. Denials are a probing signal.
-- **Multi-instance apps** (e.g. shopwala's per-tenant instances) issue **one client
-  record per instance**, with the `instance` field set and enforced in every
-  route's filter — a token never spans tenants. Naming:
-  `<APP>_<INSTANCE>_API_URL` / `<APP>_<INSTANCE>_API_TOKEN` when a consumer talks
-  to more than one.
+- **Multi-instance apps** issue **one client record per instance** — a token never
+  spans tenants. Two isolation models, both supported:
+  - **Separate stack per tenant** (shopwala: one PocketBase + `pb_data` per person).
+    Tenants are already isolated at the *database* level (distinct `tokenKey`s), so
+    there's no shared `instance` column to filter on. Each deployment sets an
+    `<APP>_API_INSTANCE` env var; every route **asserts** the token's `instance`
+    label matches it (defense-in-depth + audit clarity) rather than row-filtering.
+  - **Shared DB with an `instance` column.** Set the `instance` field on each client
+    record and **filter every route by it** so a token only sees its tenant's rows.
+  - Naming: `<APP>_<INSTANCE>_API_URL` / `<APP>_<INSTANCE>_API_TOKEN` when a consumer
+    talks to more than one.
 
 ## Build order (per app)
 
 Follow the checklist in
 [`templates/api-access/README.md`](../templates/api-access/README.md):
 
-1. Ship the `api_clients` migration (before `lock_rules`).
+1. Ship the `api_clients` migration (self-locks its rules; run it last / before any
+   final `lock_rules` sweep).
 2. Add the curated `api_x.pb.js` surface + `API_SURFACE` manifest.
 3. Define the app's scope vocabulary.
 4. Add the tailnet-only Caddy site (`/api/x/*` only).
@@ -218,7 +227,7 @@ Track adoption across the app repos here (update as apps ship it):
 | App | Migration | Curated routes | Tailnet Caddy | `docs/for-api.md` | Status |
 | --- | --- | --- | --- | --- | --- |
 | tripwala | ☑ | ☑ | ☑ | ☑ | branch `feat/api-access`, verified vs live PB 0.39.4; pending token mint + `tailscale serve` + merge |
-| shopwala | ☐ | ☐ | ☐ | ☐ | in progress |
+| shopwala | ☑ | ☑ | ☑ | ☑ | branch `feat/api-access`, verified vs live PB 0.39.4 (14/14); per-tenant via `SHOPWALA_API_INSTANCE` assertion; pending token mint + `tailscale serve` + merge |
 | _next app_ | ☐ | ☐ | ☐ | ☐ | — |
 
 ## Security / boundaries

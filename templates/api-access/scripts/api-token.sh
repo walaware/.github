@@ -115,13 +115,20 @@ case "$cmd" in
     ;;
 
   revoke)
+    # Belt-and-suspenders permanent kill: (1) active=false — the in-route
+    # requireActive() guard rejects the token on the next call; (2) reset the
+    # password so PocketBase regenerates the tokenKey, cryptographically
+    # invalidating the token even if a route ever bypassed the guard. PB 0.39.4
+    # does NOT re-run authRule per request, so (1) alone is not sufficient at the
+    # token layer — (2) is what actually voids the JWT.
     name="${1:?name}"
     tok="$(superuser_token)"
     id="$(client_id "$tok" "$name")"; [ -n "$id" ] || die "no client named '$name'"
+    pw="$(head -c 32 /dev/urandom | base64 | tr -dc 'A-Za-z0-9' | head -c 24)"
     curl -fsS -X PATCH "${PB_URL}/api/collections/${COLLECTION}/records/${id}" \
       -H "Authorization: ${tok}" -H 'Content-Type: application/json' \
-      -d '{"active":false}' >/dev/null
-    echo "revoked '$name' — active=false. All its tokens are rejected immediately."
+      -d "$(jq -n --arg pw "$pw" '{active:false, password:$pw, passwordConfirm:$pw}')" >/dev/null
+    echo "revoked '$name' — active=false AND tokenKey reset. Its tokens are dead immediately."
     ;;
 
   list)

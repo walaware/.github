@@ -19,10 +19,12 @@ edge or superuser boundary changes.
 
 ## Adoption checklist
 
-- [ ] **1. Identity.** Copy the migration into `pocketbase/pb_migrations/`,
-      **renumber** its prefix so it runs *before* the final `lock_rules`
-      migration. Edit the seed's example scopes. `docker compose up` and confirm
-      the `api_clients` collection appears.
+- [ ] **1. Identity.** Copy the migration into `pocketbase/pb_migrations/` and
+      **renumber** its prefix to run last. The migration **self-locks** its own
+      rules to superuser-only, so it's correct whether the app ends with a single
+      `lock_rules` sweep (run before it) or has collections self-lock as they're
+      created (just run last). Confirm `api_clients` ends up superuser-only. Edit
+      the seed's example scopes; `docker compose up` and confirm it appears.
 - [ ] **2. Surface.** Copy `pb_hooks/api_x.pb.js` **and** `pb_hooks/api_x_lib.js`.
       Fill in `API_SURFACE` (in the lib) and replace the example routes with the
       app's real curated read/write routes. Reads and writes are **separate** scope
