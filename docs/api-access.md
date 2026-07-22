@@ -413,7 +413,7 @@ Track adoption across the app repos here (update as apps ship it):
 
 | App | `user`-bound identity | Shared authz helper | App-server surface | Key-mgmt UI | Public Caddy | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| tripwala | ☐ | ☐ | ☐ | ☐ | ☐ | in progress — SvelteKit-mediated, being implemented by the tripwala agent |
+| tripwala | ☑ | ☑ | ☑ | ☑ | ☑ | branch `feat/personal-api-keys`, verified vs live PB 0.39.4 (user-confined reads, guest 403 on organizer writes, instant revoke, `/_/`+`/api/collections/*` 404 on the public edge); `pnpm check`/`build`/tests green. SvelteKit-mediated: shared authz in `lib/server/tripAuthz.js`, surface at `routes/api/x/v1/*`. Merge managed by the tripwala agent. |
 | _next app_ | ☐ | ☐ | ☐ | ☐ | ☐ | — |
 
 ## Security / boundaries
