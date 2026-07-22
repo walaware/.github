@@ -6,6 +6,20 @@ app-specific bits, ship the migration. The goal: a consumer needs only
 `<APP>_API_URL` + a scoped `<APP>_API_TOKEN`, and nothing about the app's public
 edge or superuser boundary changes.
 
+## Two modes — read this first
+
+The standard has **two token modes** ([full explanation](../../docs/api-access.md#two-token-modes)).
+This kit is the **service-token** reference (admin-minted, whole-app, tailnet-only,
+served by a PocketBase hook). If you want **personal keys** (an end user mints a
+key for *their own* data, reachable from the public edge), the pieces below still
+apply — the same `api_clients` collection (with the `user`/`last_used`/`token_prefix`
+fields already in the migration) — but the *surface* is different: you serve
+`/api/x/v1/*` **from the app server**, reusing the app's own authz helper, instead
+of from `api_x.pb.js`. See
+[docs/api-access.md → Personal keys](../../docs/api-access.md#personal-keys-user-self-service)
+for that pattern; there's no drop-in hook for it because it's app-server code that
+must call *your* authz. An app can run both modes at once.
+
 ## What's in the kit
 
 | File | Copies to | Role |

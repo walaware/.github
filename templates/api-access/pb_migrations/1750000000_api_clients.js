@@ -81,6 +81,37 @@ migrate((app) => {
         max: 500,
         // Who holds it, why it was issued, rotation date — for the audit trail.
       },
+
+      // ---- Personal-key fields (optional; unused by service tokens) ----------
+      // A "personal key" is a token an END USER mints for their own data (see
+      // docs/api-access.md → "Personal keys"). These three fields are null for a
+      // service token, so adding them is backward-compatible.
+      {
+        name: "user",
+        type: "relation",
+        maxSelect: 1,
+        cascadeDelete: true,
+        // SET the collectionId to the app's users collection when adopting, e.g.
+        //   collectionId: app.findCollectionByNameOrId("users").id,
+        // SET ⇒ personal key: the app server confines every request to this user
+        // (reads user-filtered, writes role-mirrored). UNSET ⇒ whole-app service
+        // token, exactly as before. cascadeDelete removes a user's keys with them.
+      },
+      {
+        name: "last_used",
+        type: "date",
+        // A plain date the app server stamps explicitly on each call
+        // (record.set('last_used', new Date()) + save) so a user can spot a
+        // stale/leaked key. Not autodate — we don't want it bumped on unrelated
+        // saves, and it's written by the surface, not by PB.
+      },
+      {
+        name: "token_prefix",
+        type: "text",
+        max: 20,
+        // First few chars of the issued token, stored at mint time so the key list
+        // can show WHICH key a row is. The full token is shown ONCE, at creation.
+      },
     ],
 
     indexes: [
