@@ -106,6 +106,25 @@ its own family logins; moneywala holds one scoped read key to the family's data.
 6. `/api/x/v1` surface from the [API Access kit](../templates/api-access/).
 7. tripwala consumes it (benefit-aware hotel search).
 
+## Risk: hotel pricing acquisition
+
+"Hotel price" is three different numbers behind three different auth walls, and
+the advisor needs all three to compare honestly. Strategy is tiered — each tier
+is only reached when the one above demonstrably isn't enough:
+
+| Tier | Price | Access | Approach |
+| --- | --- | --- | --- |
+| 1 | Public cash rates | No auth | Aggregator APIs (e.g. Amadeus self-service free tier, Google-Hotels-via-SerpAPI). tripwala's search inventory lives here. |
+| 2 | Award / member rates | Loyalty login or none | Program sites often show award pricing without login (Hyatt), or behind a *loyalty* account — much lower stakes than bank creds. Manual or scrape-light. |
+| 3 | Issuer-portal pricing (Chase Travel incl. Points Boost, Capital One Travel, promos) | **Bank login + 2FA** | **Manual quote capture, v1 and likely forever:** the human opens the portal, pastes the quote; the advisor owns all the math (benefit qualification, fee deltas, conflict detection — the part that's actually error-prone). Possible later upgrade: browser-assisted capture inside the user's own logged-in session (Paseo-driven or bookmarklet), where 2FA stays with the human and no credential is ever stored. |
+| 4 | Headless scraping with stored bank credentials | — | **Last resort, presumed never.** Storing bank creds + automating 2FA is a security posture the suite doesn't want, ToS-hostile, and brittle. Requires its own decision if ever proposed. |
+
+The design consequence: **structure is automated, quotes are inputs.** The
+advisor must work correctly when every price is hand-entered — that's the
+deterministic floor, same instinct as the suite's AI fallback rule. Issuer-portal
+prices must be checked live regardless (boosted rates vary per booking), so
+manual capture at decision time costs one paste, not a workflow.
+
 ## Open questions
 
 - Loyalty balance automation — deferred until manual entry demonstrably hurts;
@@ -114,3 +133,5 @@ its own family logins; moneywala holds one scoped read key to the family's data.
   [adopted-tools.md](adopted-tools.md); diagnose the homelab Sidekiq/cron config
   before assuming an upstream gap. Statement-credit detection depends on this.
 - Partial reservations (earmark $100 of a $250 credit) — punt until a real case.
+- Tier-1 rate vendor choice (Amadeus vs SerpAPI vs other) — tripwala's call when
+  hotel search is built; BYO-key per suite convention.
