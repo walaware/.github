@@ -20,7 +20,7 @@ conventions so the whole suite feels like a single product.
 | 🛍️ **[shopwala](https://github.com/walaware/shopwala)** | Buying & selling — a Marketplace agent + hub | in build |
 | ❤️ **healthwala** | Health & meals | planned |
 | 📦 **stuffwala** | Personal inventory | planned |
-| 👛 ~~moneywala~~ | Money & expenses | **not building — we use [Sure](https://sure.am)** |
+| 👛 **moneywala** | Money — cards, points & benefits natively; budgeting via [Sure](https://sure.am) inside | chartered — [charter](docs/moneywala-charter.md) |
 | ✅ **taskwala** | Plans & tasks | planned |
 | 👥 **folkwala** | People & relationships | planned |
 
@@ -41,7 +41,13 @@ people already doing amazing work.
 
 | Corner | We use | Why not build |
 | --- | --- | --- |
-| 👛 Money & expenses | **[Sure](https://sure.am)** — [docs](https://docs.sure.am) · [source](https://github.com/we-promise/sure) (AGPL, self-hosted) | Budgeting, investments, net worth, ~18 bank/broker/crypto integrations, BYO-key market data, and free unlimited household members on self-hosted — with finer per-account permissions than the $100/yr commercial alternatives. Taking ~200 commits a month from 160+ contributors. |
+| 👛 Budgeting & transactions | **[Sure](https://sure.am)** — [docs](https://docs.sure.am) · [source](https://github.com/we-promise/sure) (AGPL, self-hosted) | Budgeting, investments, net worth, ~18 bank/broker/crypto integrations, BYO-key market data, and free unlimited household members on self-hosted — with finer per-account permissions than the $100/yr commercial alternatives. Taking ~200 commits a month from 160+ contributors. |
+
+A corner can also resolve *both* ways at once: **moneywala** (revived 2026-09-08,
+[charter](docs/moneywala-charter.md)) natively owns what Sure was never built
+for — cards, loyalty points, recurring travel benefits — and fronts Sure as the
+engine for everything above. Sure stays adopted; moneywala is its surface, not
+its replacement.
 
 When a tool we adopt falls short, we **write it down before we act on it.** Every
 adopted tool carries a wishlist in [adopted-tools.md](docs/adopted-tools.md). Gaps get

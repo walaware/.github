@@ -13,6 +13,7 @@ so there's one source of truth and per-repo agent context stays short.
 | [conventions.md](conventions.md) | Build/code/migration/security/design conventions every repo follows. |
 | [for-agents.md](for-agents.md) | Rules of the road for coding agents: where standards live, what not to break, how to start a new app. |
 | [api-access.md](api-access.md) | The org-wide **API Access** standard — scoped, revocable API tokens for programmatic backend access (never superuser). Reference kit in [`../templates/api-access/`](../templates/api-access/). |
+| [moneywala-charter.md](moneywala-charter.md) | The revived **moneywala** charter — cards/points/benefits natively, [Sure](https://sure.am) as the engine behind it. Lives here until the repo exists. |
 
 See also (repo root): [DOCUMENTATION.md](../DOCUMENTATION.md) (doc standard),
 [CONTRIBUTING.md](../CONTRIBUTING.md), [AI_POLICY.md](../AI_POLICY.md),

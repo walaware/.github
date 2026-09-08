@@ -51,6 +51,15 @@ AGPL-3.0 · Rails 8.1 + Postgres + Redis + Sidekiq · self-hosted via docker-com
 
 **Decided 2026-07-09. `moneywala` will not be built.**
 
+**Amended 2026-09-08.** moneywala is being built after all — but with a
+**different charter** ([docs/moneywala-charter.md](moneywala-charter.md)): cards,
+loyalty points, and recurring travel benefits, a domain Sure never claimed and no
+mature self-hosted project covers. Sure **stays adopted** as the engine for
+everything on this page — moneywala fronts it (reads its `api/v1`, deep-links its
+UI) and absorbs a capability only when its wishlist row below flips to
+`confirmed`. The 2026-07-09 reasoning against rebuilding budgeting is unchanged;
+forking remains off the table.
+
 ### Docs worth bookmarking
 
 [`docs.sure.am/llms.txt`](https://docs.sure.am/llms.txt) is a machine-readable index
@@ -150,6 +159,7 @@ Tracked against HEAD `8d649bc` / `v0.7.2`.
 | **Member management is web-only.** No `invitations` endpoint under `api/v1`. | Setup friction once, then never again. | Low | `unverified` | |
 | **No per-transaction attribution or comments.** No `modified_by`; single `notes` per entry. | Only matters with two active users disagreeing about categories. | Low | `unverified` | |
 | **Self-hosted invites send no email.** `deliver_later unless self_hosted?`; UI surfaces a copy-paste accept link. | Trivial, once. | Low | `not an issue` | Copy the link. |
+| **Bank sync often doesn't run until the UI is loaded.** Accounts sit stale on the homelab instance until someone opens Sure. | Anything reading Sure's API headlessly (moneywala's statement-credit detection) sees stale transactions. | Medium | `confirmed` | Observed in daily use, 2026-09-08. Diagnose our own Sidekiq/cron/scheduler config before calling it an upstream gap — scheduled syncs may just be misconfigured on our deploy. |
 
 ### Next step
 
